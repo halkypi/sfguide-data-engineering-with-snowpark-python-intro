@@ -8,7 +8,7 @@ Last Updated: 9/26/2023
 -- SNOWFLAKE ADVANTAGE: Data sharing/marketplace (instead of ETL)
 
 
-USE ROLE HOL_ROLE;
+USE ROLE ACCOUNTADMIN;
 USE WAREHOUSE HOL_WH;
 
 
@@ -56,4 +56,50 @@ GRANT IMPORTED PRIVILEGES ON DATABASE FROSTBYTE_WEATHERSOURCE TO ROLE HOL_ROLE;
 
 
 -- Let's look at the data - same 3-part naming convention as any other table
-SELECT * FROM FROSTBYTE_WEATHERSOURCE.ONPOINT_ID.POSTAL_CODES LIMIT 100;
+SELECT * FROM WEATHER_SOURCE_LLC_FROSTBYTE.ONPOINT_ID.POSTAL_CODES LIMIT 100;
+
+select * from WEATHER_SOURCE_LLC_FROSTBYTE.ONPOINT_ID.POSTAL_CODES 
+where country = 'US' 
+and city_name ilike 'wilmington'
+LIMIT 100;
+
+SELECT
+    postal_code,
+    country,
+    date_valid_std,
+    avg_temperature_air_2m_f,
+    avg_humidity_relative_2m_pct,
+    avg_wind_speed_10m_mph,
+    tot_precipitation_in,
+    tot_snowfall_in,
+    avg_cloud_cover_tot_pct,
+    probability_of_precipitation_pct,
+    probability_of_snow_pct
+FROM
+(
+    SELECT
+        postal_code,
+        country,
+        date_valid_std,
+        avg_temperature_air_2m_f,
+        avg_humidity_relative_2m_pct,
+        avg_wind_speed_10m_mph,
+        tot_precipitation_in,
+        tot_snowfall_in,
+        avg_cloud_cover_tot_pct,
+        probability_of_precipitation_pct,
+        probability_of_snow_pct,
+        DATEADD(DAY,2,CURRENT_DATE()) AS skip_date,
+        DATEADD(DAY,7 - DAYOFWEEKISO(skip_date),skip_date) AS next_sunday,
+        DATEADD(DAY,-1,next_sunday) AS next_saturday
+    FROM
+        onpoint_id.forecast_day
+    WHERE
+        postal_code = '01887' AND
+        country = 'US'
+)
+WHERE
+    date_valid_std IN (next_saturday,next_sunday)
+ORDER BY
+    date_valid_std
+;
