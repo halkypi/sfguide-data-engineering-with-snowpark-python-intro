@@ -9,7 +9,7 @@ Last Updated: 9/26/2023
 -- SNOWFLAKE ADVANTAGE: Snowpark DataFrame API
 
 
-USE ROLE HOL_ROLE;
+USE ROLE ACCOUNTADMIN;
 USE WAREHOUSE HOL_WH;
 USE SCHEMA HOL_DB.HOL_SCHEMA;
 
@@ -39,7 +39,7 @@ def main(session: Session) -> str:
 
     # Define the tables
     order_detail = session.table("ORDER_DETAIL")
-    history_day = session.table("FROSTBYTE_WEATHERSOURCE.ONPOINT_ID.HISTORY_DAY")
+    history_day = session.table("WEATHER_SOURCE_LLC_FROSTBYTE.ONPOINT_ID.HISTORY_DAY")
     location = session.table("LOCATION")
 
     # Join the tables
